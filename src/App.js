@@ -3,8 +3,9 @@ import useFile from 'use-file';
 import './App.css';
 
 const App = () => {
-  const { result, reader } = useFile();
 
+  // uses useFile hook to load a file and return it like text string
+  const { result, reader } = useFile();
   const readFile = (e) => {
     const fileRead = e.currentTarget.files;
 
@@ -14,38 +15,40 @@ const App = () => {
     else return null
   }
 
+  //Takes text result string from loaded file and makes it to an array with objects
   const xmlConverter = (text) => {
 
     const personRegex = /P\|/g;
     const childRegex = /F\|/g;
     const endSplitRegex = /\r?\n/;
 
-    const personChildrenArraySplit = text.split(personRegex).reduce((result, value, index, array) => {
+    //Splits the main string to persons with children and arranged in array with objects, arranged the informtion for each person
+    //First reduce splits the string in array of persons and including the children for each person like elements of strings
+    const personChildrenArray = text.split(personRegex).reduce((result, value, index, array) => {
       if (value) {
         result.push(value.split(childRegex))
       }
+      console.log(result);
       return result;
-    }, []);
+    }, []).reduce((result, value, index, array) => {
+      //goes through each person and arranged the string in a carrect person object
 
-    const personChildrenArray = personChildrenArraySplit.reduce((result, value, index, array) => {
       if (value) {
         const personClean = value.reduce((result, value, index, array) => {
+          //looks for first postion in the array, thats the person otherwise its children
           if (index === 0) {
             const splitValue = value.split(endSplitRegex);
-
             const person = splitValue.reduce((result, value, index, array) => {
-
+              //looks for first postion in the array, thats the persons name
               if (index === 0) {
                 let splitValue = value.split('|');
                 result.push({ firstName: splitValue[0], lastName: splitValue[1] });
               }
-
               if (value.charAt(0) === 'T') {
                 let splitValue = value.split('|');
                 splitValue.shift();
                 result.push({ phone1: splitValue[0], phone2: splitValue[1] });
               }
-
               if (value.charAt(0) === 'A') {
                 let splitValue = value.split('|');
                 splitValue.shift();
@@ -53,16 +56,14 @@ const App = () => {
               }
               return result;
             }, [])
-
             const flatPerson = Object.assign(...person);
-
             result.push({ Person: flatPerson });
           }
-
           else {
             const splitValue = value.split(endSplitRegex);
 
             const childPerson = splitValue.reduce((result, value, index, array) => {
+              //looks for first postion in the array, thats the persons name
               if (index === 0) {
                 let splitValue = value.split('|');
                 result.push({ firstName: splitValue[0], birthday: splitValue[1] });
@@ -83,10 +84,8 @@ const App = () => {
             }, [])
 
             const flatChild = Object.assign(...childPerson);
-
             result.push({ Child: flatChild });
           }
-
           return result;
         }, []);
 
@@ -102,20 +101,27 @@ const App = () => {
       }
       return result;
     }, []);
-
     return personChildrenArray
   }
-
+  //renders a result that looks like XML possible that is possible to copy and use
   return (
     <div className="app-root">
       <div className="app-container">
-        <h1 className="app-h1">Text to XML converter</h1>
-        <input type="file" onChange={readFile} />
-
+        <h1 className="app-h1">Text representet like XML </h1>
+        <div className="input-format-box">
+          <h3 className="app-h3"> Input format:</h3>
+          <div>
+            <p>P|firstname|lastname</p>
+            <p>T|mobile|fixed number</p>
+            <p>A|street|city|postal code</p>
+            <p>F|name|year of birth</p>
+            <p>P can be followed by T, A and F</p>
+            <p>F can be followed by T och A</p></div>
+          <input type="file" onChange={readFile} />
+        </div>
 
         <h3 className="app-h3">Input text</h3>
         {result}
-
         <h3 className="app-h3">Output xml</h3>
         {xmlConverter(result).length > 0 &&
           <div>{`<?xml version=1.O encoding="UTF-8"?>`}

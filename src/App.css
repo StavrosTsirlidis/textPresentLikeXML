@@ -16,17 +16,25 @@
   flex-direction: column;
   padding:20px;
 }
-
 .app-h1{
   font-size:18px;
 }
-
 .app-h3{
   font-size:14px;
 }
-
+.input-format-box{
+  margin-bottom:2rem;
+  border:3px solid rgb(145, 161, 150);
+  padding:1rem;
+  width: 90%;
+}
 .step-in{
   padding-left:1rem;
 }
+
+p{
+  margin:0.5rem;
+}
+
 
 
